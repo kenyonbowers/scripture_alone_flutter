@@ -1,6 +1,8 @@
-import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+// App Pages
+import 'pages/home.dart';
 import 'pages/reader.dart';
 
 void main() {
@@ -15,53 +17,58 @@ class MyApp extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (context) => MyAppState(),
       child: MaterialApp(
-        title: 'Scripture Alone',
-        theme: ThemeData(
-          useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey),
-        ),
-        home: MyHomePage(),
-      ),
+          title: 'Scripture Alone',
+          theme: ThemeData(
+            useMaterial3: true,
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey),
+          ),
+          routes: {
+            '/': (context) => AppContainer(page: "bible"),
+            '/downloads': (context) => AppContainer(page: "downloads"),
+            '/devotionals': (context) => AppContainer(page: "devotionals"),
+            '/notes': (context) => AppContainer(page: "notes"),
+            '/settings': (context) => AppContainer(page: "settings"),
+          }),
     );
   }
 }
 
-class MyAppState extends ChangeNotifier {
-  var current = WordPair.random();
+class AppContainer extends StatefulWidget {
+  final String page;
+  AppContainer({required this.page});
 
-  void getNext() {
-    current = WordPair.random();
-    notifyListeners();
-  }
-
-  var favorites = <WordPair>[];
-
-  void toggleFavorite() {
-    if (favorites.contains(current)) {
-      favorites.remove(current);
-    } else {
-      favorites.add(current);
-    }
-    notifyListeners();
-  }
-}
-
-class MyHomePage extends StatefulWidget {
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<AppContainer> createState() => _AppContainerState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _AppContainerState extends State<AppContainer> {
   var selectedIndex = 0;
 
   @override
   Widget build(BuildContext context) {
+    const pages = ['bible', 'downloads', 'devotionals', 'notes', 'settings'];
     Widget page;
+
+    if (widget.page != 'bible') selectedIndex = pages.indexOf(widget.page);
     switch (selectedIndex) {
       case 0:
-        page = GeneratorPage();
+        selectedIndex = 0;
+        page = BibleReader();
         break;
       case 1:
+        selectedIndex = 1;
+        page = GeneratorPage();
+        break;
+      case 2:
+        selectedIndex = 2;
+        page = FavoritesPage();
+        break;
+      case 3:
+        selectedIndex = 3;
+        page = BibleReader();
+        break;
+      case 4:
+        selectedIndex = 4;
         page = BibleReader();
         break;
       default:
@@ -70,110 +77,41 @@ class _MyHomePageState extends State<MyHomePage> {
 
     return LayoutBuilder(builder: (context, constraints) {
       return Scaffold(
-        body: Row(
-          children: [
-            SafeArea(
-              child: NavigationRail(
-                extended: constraints.maxWidth >= 800,
-                destinations: [
-                  NavigationRailDestination(
-                    icon: Icon(Icons.home),
-                    label: Text('Home'),
-                  ),
-                  NavigationRailDestination(
-                    icon: Icon(Icons.favorite),
-                    label: Text('Favorites'),
-                  ),
-                ],
-                selectedIndex: selectedIndex,
-                onDestinationSelected: (value) {
-                  setState(() {
-                    selectedIndex = value;
-                  });
-                },
-              ),
+        body: page,
+        bottomNavigationBar: BottomNavigationBar(
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.menu_book),
+              label: 'Bible',
             ),
-            Expanded(
-              child: Container(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                child: page,
-              ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.download),
+              label: 'Downloads',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.book),
+              label: 'Devotionals',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.edit),
+              label: 'Notes',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.settings),
+              label: 'Settings',
             ),
           ],
+          currentIndex: selectedIndex,
+          selectedItemColor: Colors.blueGrey[500],
+          unselectedItemColor: Colors.grey,
+          onTap: (index) {
+            setState(() {
+              selectedIndex = index;
+            });
+          },
         ),
       );
     });
-  }
-}
-
-class GeneratorPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    var appState = context.watch<MyAppState>();
-    var pair = appState.current;
-
-    IconData icon;
-    if (appState.favorites.contains(pair)) {
-      icon = Icons.favorite;
-    } else {
-      icon = Icons.favorite_border;
-    }
-
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          BigCard(pair: pair),
-          SizedBox(height: 10),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ElevatedButton.icon(
-                onPressed: () {
-                  appState.toggleFavorite();
-                },
-                icon: Icon(icon),
-                label: Text('Like'),
-              ),
-              SizedBox(width: 10),
-              ElevatedButton(
-                onPressed: () {
-                  appState.getNext();
-                },
-                child: Text('Next'),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class BigCard extends StatelessWidget {
-  const BigCard({
-    super.key,
-    required this.pair,
-  });
-
-  final WordPair pair;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final style = theme.textTheme.displayLarge!.copyWith(
-      color: theme.colorScheme.onPrimary,
-    );
-
-    return Card(
-      color: theme.colorScheme.secondary,
-      elevation: 20,
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Text(pair.asPascalCase,
-            style: style, semanticsLabel: "${pair.first} ${pair.second}"),
-      ),
-    );
   }
 }
 
