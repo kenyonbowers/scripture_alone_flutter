@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 // App Pages
 import 'pages/home.dart';
 import 'pages/reader.dart';
+import 'pages/settings.dart';
 
 void main() {
   runApp(MyApp());
@@ -42,7 +43,7 @@ class AppContainer extends StatefulWidget {
 }
 
 class _AppContainerState extends State<AppContainer> {
-  var selectedIndex = 0;
+  var selectedIndex = 4;
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +54,7 @@ class _AppContainerState extends State<AppContainer> {
     switch (selectedIndex) {
       case 0:
         selectedIndex = 0;
-        page = BibleReader();
+        page = BiblePage();
         break;
       case 1:
         selectedIndex = 1;
@@ -65,11 +66,11 @@ class _AppContainerState extends State<AppContainer> {
         break;
       case 3:
         selectedIndex = 3;
-        page = BibleReader();
+        page = BiblePage();
         break;
       case 4:
         selectedIndex = 4;
-        page = BibleReader();
+        page = SettingsPage();
         break;
       default:
         throw UnimplementedError('no widget for $selectedIndex');

@@ -22,79 +22,7 @@ class BibleVerse {
   String info = "";
 }
 
-class MySecondHomePage extends StatefulWidget {
-  @override
-  State<MySecondHomePage> createState() => _MySecondHomePage();
-}
-
-class _MySecondHomePage extends State<MySecondHomePage> {
-  var selectedIndex = 0;
-
-  @override
-  Widget build(BuildContext context) {
-    Widget page;
-    switch (selectedIndex) {
-      case 0:
-        page = BibleReader();
-        break;
-      case 1:
-        page = BibleReader();
-        break;
-      default:
-        throw UnimplementedError('no widget for $selectedIndex');
-    }
-
-    return LayoutBuilder(builder: (context, constraints) {
-      return Scaffold(
-        body: Row(
-          children: [
-            SafeArea(
-              child: NavigationRail(
-                extended: constraints.maxWidth >= 800,
-                destinations: [
-                  NavigationRailDestination(
-                    icon: Icon(Icons.menu_book),
-                    label: Text('Bible'),
-                  ),
-                  NavigationRailDestination(
-                    icon: Icon(Icons.download),
-                    label: Text('Versions'),
-                  ),
-                  NavigationRailDestination(
-                    icon: Icon(Icons.book),
-                    label: Text('Devotionals'),
-                  ),
-                  NavigationRailDestination(
-                    icon: Icon(Icons.edit),
-                    label: Text('Notes'),
-                  ),
-                  NavigationRailDestination(
-                    icon: Icon(Icons.settings),
-                    label: Text('Settings'),
-                  ),
-                ],
-                selectedIndex: selectedIndex,
-                onDestinationSelected: (value) {
-                  setState(() {
-                    selectedIndex = value;
-                  });
-                },
-              ),
-            ),
-            Expanded(
-              child: Container(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                child: BibleReader(),
-              ),
-            ),
-          ],
-        ),
-      );
-    });
-  }
-}
-
-class BibleReaderState extends ChangeNotifier {
+class BiblePageState extends ChangeNotifier {
   var chapterData = BibleChapter();
 
   Future<void> fetchChapterFromInternet() async {
@@ -135,15 +63,13 @@ class BibleReaderState extends ChangeNotifier {
       print('Error: $e');
     }
   }
-
-  // ...
 }
 
-class BibleReader extends StatelessWidget {
+class BiblePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => BibleReaderState(),
+      create: (context) => BiblePageState(),
       child: MaterialApp(
         title: 'Scripture Alone',
         theme: ThemeData(
@@ -159,7 +85,7 @@ class BibleReader extends StatelessWidget {
 class Reader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    var appState = context.watch<BibleReaderState>();
+    var appState = context.watch<BiblePageState>();
     var chapterData = appState.chapterData;
 
     return Center(
