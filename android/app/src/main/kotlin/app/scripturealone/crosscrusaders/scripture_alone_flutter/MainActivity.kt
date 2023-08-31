@@ -1,4 +1,4 @@
-package app.scripturealone.crosscrusaders
+package dev.scripturealone.crosscrusaders
 
 import io.flutter.embedding.android.FlutterActivity
 

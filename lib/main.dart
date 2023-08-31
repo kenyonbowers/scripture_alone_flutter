@@ -1,145 +1,305 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
-// App Pages
-import 'pages/home.dart';
+import 'package:go_router/go_router.dart';
 import 'pages/reader.dart';
-import 'pages/settings.dart';
 
-void main() {
-  runApp(MyApp());
+Future<void> main() async {
+  runApp(
+    StatefulShellRouteExampleApp(),
+  );
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class ScaffoldBottomNavigationBar extends StatelessWidget {
+  const ScaffoldBottomNavigationBar({
+    required this.navigationShell,
+    Key? key,
+  }) : super(key: key ?? const ValueKey<String>('ScaffoldBottomNavigationBar'));
+
+  final StatefulNavigationShell navigationShell;
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => MyAppState(),
-      child: MaterialApp(
-          title: 'Scripture Alone',
-          theme: ThemeData(
-            useMaterial3: true,
-            colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey),
-          ),
-          routes: {
-            '/': (context) => AppContainer(page: "bible"),
-            '/downloads': (context) => AppContainer(page: "downloads"),
-            '/devotionals': (context) => AppContainer(page: "devotionals"),
-            '/notes': (context) => AppContainer(page: "notes"),
-            '/settings': (context) => AppContainer(page: "settings"),
-          }),
+    return Scaffold(
+      body: navigationShell,
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(icon: Icon(Icons.menu_book), label: 'Bible'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.download), label: 'Downloads'),
+          BottomNavigationBarItem(icon: Icon(Icons.book), label: 'Devotionals'),
+          BottomNavigationBarItem(icon: Icon(Icons.edit), label: 'Notes'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.settings), label: 'Settings'),
+        ],
+        currentIndex: navigationShell.currentIndex,
+        onTap: (int tappedIndex) {
+          navigationShell.goBranch(tappedIndex);
+        },
+        selectedItemColor: Colors.blueGrey[600],
+        unselectedItemColor: Colors.blueGrey[400],
+        backgroundColor: Colors.white,
+        iconSize: 24,
+      ),
     );
   }
 }
 
-class AppContainer extends StatefulWidget {
-  final String page;
-  AppContainer({required this.page});
+class StatefulShellRouteExampleApp extends StatelessWidget {
+  StatefulShellRouteExampleApp({super.key});
 
-  @override
-  State<AppContainer> createState() => _AppContainerState();
-}
-
-class _AppContainerState extends State<AppContainer> {
-  var selectedIndex = 4;
+  final GoRouter _router = GoRouter(
+    initialLocation: '/bible',
+    routes: <RouteBase>[
+      GoRoute(
+        path: '/login',
+        builder: (BuildContext context, GoRouterState state) {
+          return const LoginScreen();
+        },
+        routes: <RouteBase>[
+          GoRoute(
+            path: 'detailLogin',
+            builder: (BuildContext context, GoRouterState state) {
+              return const DetailLoginScreen();
+            },
+          ),
+        ],
+      ),
+      StatefulShellRoute.indexedStack(
+        builder: (BuildContext context, GoRouterState state,
+            StatefulNavigationShell navigationShell) {
+          return ScaffoldBottomNavigationBar(
+            navigationShell: navigationShell,
+          );
+        },
+        branches: <StatefulShellBranch>[
+          StatefulShellBranch(
+            routes: <RouteBase>[
+              GoRoute(
+                path: '/bible',
+                builder: (BuildContext context, GoRouterState state) {
+                  return BiblePage();
+                },
+                routes: <RouteBase>[
+                  GoRoute(
+                    path: 'details',
+                    builder: (BuildContext context, GoRouterState state) {
+                      return const DetailsScreen(label: 'A');
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: <RouteBase>[
+              GoRoute(
+                path: '/sectionB',
+                builder: (BuildContext context, GoRouterState state) {
+                  return const RootScreen(
+                    label: 'Section B',
+                    detailsPath: '/sectionB/details',
+                  );
+                },
+                routes: <RouteBase>[
+                  GoRoute(
+                    path: 'details',
+                    builder: (BuildContext context, GoRouterState state) {
+                      return const DetailsScreen(label: 'B');
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: <RouteBase>[
+              GoRoute(
+                path: '/sectionC',
+                builder: (BuildContext context, GoRouterState state) {
+                  return const RootScreen(
+                    label: 'Section C',
+                    detailsPath: '/sectionC/details',
+                  );
+                },
+                routes: <RouteBase>[
+                  GoRoute(
+                    path: 'details',
+                    builder: (BuildContext context, GoRouterState state) {
+                      return const DetailsScreen(label: 'C');
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    ],
+  );
 
   @override
   Widget build(BuildContext context) {
-    const pages = ['bible', 'downloads', 'devotionals', 'notes', 'settings'];
-    Widget page;
-
-    if (widget.page != 'bible') selectedIndex = pages.indexOf(widget.page);
-    switch (selectedIndex) {
-      case 0:
-        selectedIndex = 0;
-        page = BiblePage();
-        break;
-      case 1:
-        selectedIndex = 1;
-        page = GeneratorPage();
-        break;
-      case 2:
-        selectedIndex = 2;
-        page = FavoritesPage();
-        break;
-      case 3:
-        selectedIndex = 3;
-        page = BiblePage();
-        break;
-      case 4:
-        selectedIndex = 4;
-        page = SettingsPage();
-        break;
-      default:
-        throw UnimplementedError('no widget for $selectedIndex');
-    }
-
-    return LayoutBuilder(builder: (context, constraints) {
-      return Scaffold(
-        body: page,
-        bottomNavigationBar: BottomNavigationBar(
-          items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(Icons.menu_book),
-              label: 'Bible',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.download),
-              label: 'Downloads',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.book),
-              label: 'Devotionals',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.edit),
-              label: 'Notes',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.settings),
-              label: 'Settings',
-            ),
-          ],
-          currentIndex: selectedIndex,
-          selectedItemColor: Colors.blueGrey[500],
-          unselectedItemColor: Colors.grey,
-          onTap: (index) {
-            setState(() {
-              selectedIndex = index;
-            });
-          },
-        ),
-      );
-    });
+    return MaterialApp.router(
+      title: 'Go_router Complex Demo',
+      theme: ThemeData(
+        primarySwatch: Colors.orange,
+      ),
+      routerConfig: _router,
+    );
   }
 }
 
-class FavoritesPage extends StatelessWidget {
+class RootScreen extends StatelessWidget {
+  const RootScreen({
+    required this.label,
+    required this.detailsPath,
+    super.key,
+  });
+
+  final String label;
+  final String detailsPath;
+
   @override
   Widget build(BuildContext context) {
-    var appState = context.watch<MyAppState>();
-
-    if (appState.favorites.isEmpty) {
-      return Center(
-        child: Text('No favorites yet.'),
-      );
-    }
-
-    return ListView(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(20),
-          child: Text('You have '
-              '${appState.favorites.length} favorites:'),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Root of section $label'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Text(
+              'Screen $label',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const Padding(padding: EdgeInsets.all(4)),
+            TextButton(
+              onPressed: () {
+                GoRouter.of(context).go(detailsPath);
+              },
+              child: const Text('View details'),
+            ),
+            const Padding(padding: EdgeInsets.all(4)),
+            TextButton(
+              onPressed: () {
+                GoRouter.of(context).go('/login');
+              },
+              child: const Text('Logout'),
+            ),
+          ],
         ),
-        for (var pair in appState.favorites)
-          ListTile(
-            leading: Icon(Icons.favorite),
-            title: Text(pair.asPascalCase),
+      ),
+    );
+  }
+}
+
+class DetailsScreen extends StatefulWidget {
+  const DetailsScreen({
+    required this.label,
+    super.key,
+  });
+
+  final String label;
+
+  @override
+  State<StatefulWidget> createState() => DetailsScreenState();
+}
+
+class DetailsScreenState extends State<DetailsScreen> {
+  int _counter = 0;
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Details Screen - ${widget.label}'),
+      ),
+      body: _build(context),
+    );
+  }
+
+  Widget _build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Text(
+            'Details for ${widget.label} - Counter: $_counter',
+            style: Theme.of(context).textTheme.titleLarge,
           ),
-      ],
+          const Padding(padding: EdgeInsets.all(4)),
+          TextButton(
+            onPressed: () {
+              setState(() {
+                _counter++;
+              });
+            },
+            child: const Text('Increment counter'),
+          ),
+          const Padding(padding: EdgeInsets.all(8)),
+          const Padding(padding: EdgeInsets.all(4)),
+          TextButton(
+            onPressed: () {
+              GoRouter.of(context).go('/login');
+            },
+            child: const Text('Logout'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class LoginScreen extends StatelessWidget {
+  const LoginScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Login Screen')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            ElevatedButton(
+              onPressed: () {
+                context.go('/login/detailLogin');
+              },
+              child: const Text('Go to the Details Login screen'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class DetailLoginScreen extends StatelessWidget {
+  const DetailLoginScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Details Login Screen')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <ElevatedButton>[
+            ElevatedButton(
+              onPressed: () {
+                // context.go('/sectionA');
+                context.go('/sectionB');
+              },
+              child: const Text('Go to BottomNavBar'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

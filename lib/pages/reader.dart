@@ -25,10 +25,10 @@ class BibleVerse {
 class BiblePageState extends ChangeNotifier {
   var chapterData = BibleChapter();
 
-  Future<void> fetchChapterFromInternet() async {
+  Future<void> fetchChapterFromInternet(String bookId) async {
     try {
       final response = await http.get(Uri.parse(
-          'https://raw.githubusercontent.com/kenyonbowers/HostedBibleVersions/main/KJB1762/MRK/5.json'));
+          'https://raw.githubusercontent.com/kenyonbowers/HostedBibleVersions/main/KJB1762/${bookId}/1.json'));
       if (response.statusCode == 200) {
         final jsonMap = json.decode(response.body);
         print(response.body.runtimeType);
@@ -87,13 +87,22 @@ class Reader extends StatelessWidget {
   Widget build(BuildContext context) {
     var appState = context.watch<BiblePageState>();
     var chapterData = appState.chapterData;
+    var inputValue = '';
 
     return Center(
       child: ListView(
         children: [
+          TextField(
+            onChanged: (value) {
+              inputValue = value;
+            },
+            decoration: InputDecoration(
+              labelText: 'Enter something',
+            ),
+          ),
           ElevatedButton(
             onPressed: () {
-              appState.fetchChapterFromInternet();
+              appState.fetchChapterFromInternet(inputValue);
             },
             child: Text('Next'),
           ),
