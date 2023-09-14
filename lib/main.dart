@@ -18,26 +18,34 @@ class ScaffoldBottomNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: navigationShell,
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.menu_book), label: 'Bible'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.download), label: 'Downloads'),
-          BottomNavigationBarItem(icon: Icon(Icons.book), label: 'Devotionals'),
-          BottomNavigationBarItem(icon: Icon(Icons.edit), label: 'Notes'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.settings), label: 'Settings'),
-        ],
-        currentIndex: navigationShell.currentIndex,
-        onTap: (int tappedIndex) {
-          navigationShell.goBranch(tappedIndex);
-        },
-        selectedItemColor: Colors.blueGrey[600],
-        unselectedItemColor: Colors.blueGrey[400],
-        backgroundColor: Colors.white,
-        iconSize: 24,
+    return WillPopScope(
+      onWillPop: () async {
+        final success = GoRouter.of(context).pop();
+        return true; // Prevents the app from exiting when there are no pages to pop.
+      },
+      child: Scaffold(
+        body: navigationShell,
+        bottomNavigationBar: BottomNavigationBar(
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+                icon: Icon(Icons.menu_book), label: 'Bible'),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.download), label: 'Downloads'),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.book), label: 'Devotionals'),
+            BottomNavigationBarItem(icon: Icon(Icons.edit), label: 'Notes'),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.settings), label: 'Settings'),
+          ],
+          currentIndex: navigationShell.currentIndex,
+          onTap: (int tappedIndex) {
+            navigationShell.goBranch(tappedIndex);
+          },
+          selectedItemColor: Colors.blueGrey[600],
+          unselectedItemColor: Colors.blueGrey[400],
+          backgroundColor: Colors.white,
+          iconSize: 24,
+        ),
       ),
     );
   }
