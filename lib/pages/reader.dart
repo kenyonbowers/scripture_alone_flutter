@@ -90,24 +90,27 @@ class Reader extends StatelessWidget {
     var inputValue = '';
 
     return Center(
-      child: ListView(
-        children: [
-          TextField(
-            onChanged: (value) {
-              inputValue = value;
-            },
-            decoration: InputDecoration(
-              labelText: 'Enter something',
+      child: Container(
+        color: Colors.white,
+        child: ListView(
+          children: [
+            TextField(
+              onChanged: (value) {
+                inputValue = value.toUpperCase();
+              },
+              decoration: InputDecoration(
+                labelText: 'Enter something',
+              ),
             ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              appState.fetchChapterFromInternet(inputValue);
-            },
-            child: Text('Next'),
-          ),
-          for (var verse in chapterData.verses) VerseText(verse: verse)
-        ],
+            ElevatedButton(
+              onPressed: () {
+                appState.fetchChapterFromInternet(inputValue);
+              },
+              child: Text('Next'),
+            ),
+            for (var verse in chapterData.verses) VerseText(verse: verse)
+          ],
+        ),
       ),
     );
   }
@@ -127,13 +130,23 @@ class VerseText extends StatelessWidget {
     var finalText = "";
 
     return Card(
-      color: theme.colorScheme.secondary,
-      elevation: 20,
+      color: Colors.white,
+      elevation: 0,
       child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: RichText(
-          text: TextSpan(
+        padding: const EdgeInsets.all(10),
+        child: Text.rich(
+          TextSpan(
             children: [
+              TextSpan(
+                text: "${verse.verse}",
+                style: TextStyle(
+                  fontWeight: FontWeight.w900,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+              WidgetSpan(
+                child: SizedBox(width: 12.0),
+              ),
               for (var word in verse.text)
                 if (word.startsWith("|*"))
                   TextSpan(
